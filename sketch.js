@@ -1,25 +1,28 @@
 let handPose;
+
 let video;
+
+
+
 let hands = [];
 
 let canvasWidth = 960;
 let canvasHeight = 720;
-
 let thumbTipIndex = 4;
 let indexTipIndex = 8;
 let fingerTipIndexes = [thumbTipIndex, indexTipIndex];
-
 let minLeftHandDistance = 20;
 let maxLeftHandDistance = 220;
-let leftHandDistance = null;
-let leftHandDistanceNormalized = null;
-
 let minRightHandRotation = 0;
 let maxRightHandRotation = Math.PI / 2;
+let rightHandSwitchThreshold = 90;
+let leftHandDistance = null;
+let leftHandDistanceNormalized = null;
 let rightHandRotation = null;
 let rightHandRotationNormalized = null;
 let rightHandSwitch = false; 
 let rightHandWasOverThreshold = false; 
+
 
 function preload(){
     handPose = ml5.handPose();
@@ -32,6 +35,8 @@ function setup(){
     video = createCapture(VIDEO, {flipped: true});
     video.size(canvasWidth, canvasHeight);
     video.hide();
+
+    setupInteractive()
 
     handPose.detectStart(video, gotHands);
     textFont("monospace");
@@ -117,7 +122,8 @@ function updateRightHandRotation(hand){
     let dy = indexTip.y - thumbTip.y;
 
     rightHandRotation = atan2(abs(dx), -dy);
-    rightHandRotationNormalized = normalizeValue(rightHandRotation, 
+    rightHandRotationNormalized = normalizeValue(
+        rightHandRotation, 
         minRightHandRotation, 
         maxRightHandRotation
     );
@@ -138,7 +144,7 @@ function updateRightHandRotation(hand){
 }
 
 function updateRightHandSwich(rotationDeg){
-    let isOverThreshold = rotationDeg > rightHandWasOverThreshold;
+    let isOverThreshold = rotationDeg > rightHandSwitchThreshold;
 
     if(isOverThreshold && rightHandWasOverThreshold === false){
         rightHandSwitch = !rightHandSwitch; 

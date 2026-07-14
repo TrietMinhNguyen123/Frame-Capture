@@ -1,10 +1,31 @@
-let elements = ["I", "AM", "THE", "GOAT", "THIS", "IS", "AT", "TEST", "RUN"];
+let elements = ["Hi There!", "MY NAME", "IS", "TRIET NGUYEN","AND","I", "AM", "THE", "GOAT"];
 
 let currentElementIndex = 0;
 
 let elementScaleAmount = 0.5;
 let minElementTextSize = 12;
-let maxElementTextSize = 360;
+let maxElementTextSize = 160;
+
+let elementVideos = {};
+let elementTextLayer;
+
+let elementAudios = {};
+let audioStarted = false; 
+
+function setupInteractive(){
+    for(let i = 0; i < elements.length; i++){
+        let elementName = elements[i];
+
+        let videoPath = "assets/" + elementName.toLowerCase() + "_640.mp4";
+
+        elementVideos[elementName] = createVideo(videoPath);
+        elementVideos[elementName].hide();
+        elementVideos[elementName].volume(0);
+        elementVideos[elementName].loop();
+    }
+
+    elementTextLayer = createGraphics(width, height);
+}
 
 function advanceElement(){
     currentElementIndex++;
