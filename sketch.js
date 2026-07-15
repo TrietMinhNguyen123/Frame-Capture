@@ -174,8 +174,8 @@ let handPose;
 let video;
 let hands = [];
 
-let canvasWidth = 960;
-let canvasHeight = 720;
+let canvasWidth = 1440;
+let canvasHeight = 1080;
 
 let thumbTipIndex = 4;
 let indexTipIndex = 8;
@@ -192,16 +192,18 @@ let frozenFilterAreas = [];
 
 let minimumFilterAreaSize = 30;
 
-let maximumFrozenAreas = 10;
+let maximumFrozenAreas = 15;
 
 let filterNames = ["grayscale", "blur", "retro", "invert"];
 
 let currentFilterIndex = 0; 
 
-let previousRightHandX = null;
+let previousRightHandY = null;
 
-let flickThreshold = 25;
+let flickThreshold = 30;
 let flickCooldown = 650;
+
+let animationMode = false;
 
 let lastFlickTime = -Infinity;
 
@@ -266,7 +268,7 @@ function draw(){
             updateRightHandFlick(rightControlPoint);
         }
     }else{
-        previousRightHandX = null;
+        previousRightHandY = null;
     }
 
     for(let i = 0; i < hands.length; i++){
@@ -344,8 +346,28 @@ function getFilteredRegion(area){
     if(currentFilter === "grayscale"){
         region.filter(GRAY);
     }
-    if(currentFilter === "blur"){
-        region.filter(BLUR, 8);
+    if (currentFilter === "blur") {
+        let smallWidth = max(
+            1,
+            floor(region.width * 0.35)
+        );
+
+        let smallHeight = max(
+            1,
+            floor(region.height * 0.35)
+        );
+
+        region.resize(
+            smallWidth,
+            smallHeight
+        );
+
+        region.filter(BLUR, 2);
+
+        region.resize(
+            area.width,
+            area.height
+        );
     }
     if(currentFilter === "retro"){
         region.filter(POSTERIZE, 5);
@@ -396,26 +418,42 @@ function drawFrozenFilterAreas(){
 }
 
 function updateRightHandFlick(point){
-    if(previousRightHandX === null){
-        previousRightHandX = point.x;
-        return;
-    }
+    if(!animationMode){
+        if(previousRightHandY === null){
+            previousRightHandY = point.y;
+            return;
+        }
 
-    let movementX = point.x - previousRightHandX;
+        let movementY = point.y - previousRightHandY;
 
-    let enoughTimePassed = (millis() - lastFlickTime) > flickCooldown;
+        let enoughTimePassed = (millis() - lastFlickTime) > flickCooldown;
 
-    if(abs(movementX) > flickThreshold && enoughTimePassed){
-        stampCurrentFilteredRegion()
-        lastFlickTime = millis();
-        currentFilterIndex++;
+        if(abs(movementY) > flickThreshold && enoughTimePassed){
+            stampCurrentFilteredRegion()
+            lastFlickTime = millis();
+            currentFilterIndex++;
 
-    if (currentFilterIndex >= filterNames.length) {
-        currentFilterIndex = 0;
-    }
-    }
+        if (currentFilterIndex >= filterNames.length) {
+            currentFilterIndex = 0;
+        }
+        }
 
-    previousRightHandX = point.x
+        previousRightHandY= point.y
+    }else if(animationMode){
+        let thumbTip = hands[0].keypoints[thumbTipIndex];
+        let indexTip = hands[0].keypoints[indexTipIndex];
+        let cooldown = 500;
+        let dy = indexTip.y - thumbTip.y;
+
+        if(abs(dy) < thumbTip.y * 0.5){
+            stampCurrentFilteredRegion();
+            currentFilterIndex++;
+            
+            if(currentFilterIndex >= filterNames.length){
+                currentFilterIndex = 0;
+            }
+        }
+}
 }
 
 function drawFingerTips(hand){
@@ -431,9 +469,6 @@ function drawFingerTips(hand){
 } 
 
 function drawControlPoint(point, label){
-    fill(0,0,0)
-    noStroke();
-    circle(width - point.x, point.y, 12);
     
     fill(255);
     textSize(14)
@@ -461,6 +496,10 @@ function keyPressed(){
     if(key.toLowerCase() === "s"){
         stampCurrentFilteredRegion();
     }
+
+    if(key.toLowerCase() === "q"){
+        animationMode = !animationMode;
+    }
 }
 
 function drawInterface(){
@@ -485,4 +524,10 @@ function drawInterface(){
     text("Right-hand flick: stamp | C: clear",30,78);
 
     text("S: test stamp",30,98);
+
+    if(!animationMode){
+    text("Q: animation mode",150,98);
+    }else if (animationMode){
+        text("Q: capture mode",150,98);
+    }
 }
