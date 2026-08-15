@@ -1,0 +1,84 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triet Nguyen ml5 HandPose Sketch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+<script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+<script src="interactive.js"></script>
+<script src="sketch.js"></script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandPose Filter Window</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="left-captures" class="capture-sidebar capture-sidebar-left">
+            <div class="capture-strip-title">
+        FRAME CAPTURE
+    </div>
+    </div>
+
+<div id="right-captures" class="capture-sidebar capture-sidebar-right">
+        <div class="capture-strip-title">
+        FRAME CAPTURE
+    </div>
+</div>
+
+<div id="frame-modal" class="frame-modal hidden">
+    <div class="frame-modal-content">
+
+        <button id="close-frame-modal" class="close-button">
+            ×
+        </button>
+
+        <h2>Frame Capture</h2>
+
+        <img
+            id="selected-frame-image"
+            alt="Selected captured frame"
+        >
+
+        <input
+            id="frame-email"
+            type="email"
+            placeholder="Enter your email"
+        >
+
+        <div class="frame-actions">
+            <button id="download-frame-button">
+                Download
+            </button>
+
+            <button id="email-frame-button">
+                Send to Email
+            </button>
+        </div>
+
+        <p id="frame-email-status"></p>
+
+    </div>
+</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@1/dist/ml5.min.js"></script>
+    <script src="sketch.js"></script>
+</body>
+</html>
