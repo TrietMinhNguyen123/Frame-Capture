@@ -41,11 +41,11 @@ let previousRightHandY = null;
 
 
 let previousRingTipY = null;
-let ringClickThreshold = 7;
+let ringClickThreshold = 9;
 let ringClickCooldown = 650;
 let lastRingClickTime = -Infinity;
 
-let animationMode = false;
+let fullCanvasCaptureMode = false;
 
 function preload(){
     handPose = ml5.handPose();
@@ -444,7 +444,13 @@ function keyPressed(){
     }
 
     if(key.toLowerCase() === "q"){
-        animationMode = !animationMode;
+        fullCanvasCaptureMode = !fullCanvasCaptureMode;
+
+    console.log(
+        fullCanvasCaptureMode
+            ? "FULL CANVAS MODE"
+            : "FRAME MODE"
+    );
     }
 }
 
@@ -471,10 +477,10 @@ function drawInterface(){
 
     text("S: test stamp",30,98);
 
-    if(!animationMode){
-    text("Q: animation mode",150,98);
-    }else if (animationMode){
-        text("Q: capture mode",150,98);
+    if(!fullCanvasCaptureMode){
+    text("Q: Frame mode",150,98);
+    }else if (fullCanvasCaptureMode){
+        text("Q: Whole canvas mode",150,98);
     }
 }
 
@@ -740,8 +746,76 @@ function captureAndStampCurrentFrame() {
         return;
     }
 
+    // // -------------------------
+    // // 1. STAMP ONTO THE CANVAS
+    // // -------------------------
+
+    // frozenFilterAreas.push({
+    //     x: currentFilterArea.x,
+    //     y: currentFilterArea.y,
+    //     width: currentFilterArea.width,
+    //     height: currentFilterArea.height,
+
+    //     // Make a copy for the frozen canvas
+    //     image: filteredImage.get()
+    // });
+
+    // if (
+    //     frozenFilterAreas.length >
+    //     maximumFrozenAreas
+    // ) {
+    //     frozenFilterAreas.shift();
+    // }
+
+    // // -------------------------
+    // // 2. SAVE TO PHOTO SIDEBAR
+    // // -------------------------
+
+    // let imageData =
+    //     filteredImage.canvas.toDataURL(
+    //         "image/png"
+    //     );
+
+    // capturedFrames.push({
+    //     id: Date.now(),
+    //     image: imageData
+    // });
+
+    // if (
+    //     capturedFrames.length >
+    //     maximumCapturedFrames
+    // ) {
+    //     capturedFrames.shift();
+    // }
+
+    // updateCaptureSidebars();
+
+    // console.log("FRAME CAPTURED + STAMPED!");
+
+ 
+
+    if (fullCanvasCaptureMode) {
+        captureFullCanvas();
+    } else {
+        captureFilteredFrame();
+    }
+}
+
+function captureFilteredFrame() {
+    if (currentFilterArea === null) {
+        console.log("No filter area to capture");
+        return;
+    }
+
+    let filteredImage =
+        getFilteredRegion(currentFilterArea);
+
+    if (filteredImage === null) {
+        return;
+    }
+
     // -------------------------
-    // 1. STAMP ONTO THE CANVAS
+    // STAMP FILTER ON CANVAS
     // -------------------------
 
     frozenFilterAreas.push({
@@ -749,8 +823,6 @@ function captureAndStampCurrentFrame() {
         y: currentFilterArea.y,
         width: currentFilterArea.width,
         height: currentFilterArea.height,
-
-        // Make a copy for the frozen canvas
         image: filteredImage.get()
     });
 
@@ -762,7 +834,7 @@ function captureAndStampCurrentFrame() {
     }
 
     // -------------------------
-    // 2. SAVE TO PHOTO SIDEBAR
+    // SAVE ONLY FILTER FRAME
     // -------------------------
 
     let imageData =
@@ -770,10 +842,31 @@ function captureAndStampCurrentFrame() {
             "image/png"
         );
 
-    capturedFrames.push({
+    saveCapturedImage(imageData);
+
+    console.log("FRAME CAPTURED");
+}
+
+function captureFullCanvas() {
+
+    let canvasImage =
+        mainCanvas.elt.toDataURL(
+            "image/png"
+        );
+
+    saveCapturedImage(canvasImage);
+
+    console.log("FULL CANVAS CAPTURED");
+}
+
+function saveCapturedImage(imageData) {
+
+    let newFrame = {
         id: Date.now(),
         image: imageData
-    });
+    };
+
+    capturedFrames.push(newFrame);
 
     if (
         capturedFrames.length >
@@ -783,6 +876,4 @@ function captureAndStampCurrentFrame() {
     }
 
     updateCaptureSidebars();
-
-    console.log("FRAME CAPTURED + STAMPED!");
 }
