@@ -126,7 +126,7 @@ function draw() {
     );
 
     image(cameraFrame, 0, 0);
-
+    drawFrozenFilterAreas()
     leftControlPoint = null;
     rightControlPoint = null;
     rightHandDetected = null;
